@@ -25,7 +25,7 @@ const createError = (message: string) => {
 };
 
 export const authProvider: AuthProvider = {
-  login: async ({ username, password }) => {
+  login: async ({ username, password, recaptchaToken }) => {
     if (!username || !password) {
       return {
         success: false,
@@ -49,6 +49,7 @@ export const authProvider: AuthProvider = {
         body: JSON.stringify({
           user: username,
           password,
+          recaptchaToken: recaptchaToken || undefined,
         }),
       });
 

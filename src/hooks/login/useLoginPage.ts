@@ -1,6 +1,7 @@
 import { Form } from "antd";
 import { useEffect } from "react";
 import { useLogin, useIsAuthenticated } from "@refinedev/core";
+import { useReCaptchaToken } from "../useReCaptcha";
 
 export type LoginFormValues = {
   user: string;
@@ -12,6 +13,7 @@ export const useLoginPage = () => {
   const { mutate: login, isLoading: isLoginLoading, error } = useLogin();
   const { data, isLoading: isAuthLoading } = useIsAuthenticated();
   const hasSession = Boolean(data?.authenticated);
+  const { getReCaptchaToken } = useReCaptchaToken();
 
   useEffect(() => {
     if (error) {
@@ -19,10 +21,13 @@ export const useLoginPage = () => {
     }
   }, [error, form]);
 
-  const onFinish = ({ user, password }: LoginFormValues) => {
+  const onFinish = async ({ user, password }: LoginFormValues) => {
+    const recaptchaToken = await getReCaptchaToken();
+    
     login({
       username: user,
       password,
+      recaptchaToken: recaptchaToken || undefined,
     });
   };
 

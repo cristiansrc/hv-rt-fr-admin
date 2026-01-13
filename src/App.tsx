@@ -1,6 +1,5 @@
 import { Refine, useIsAuthenticated } from "@refinedev/core";
 import type { ReactNode } from "react";
-import { DevtoolsPanel, DevtoolsProvider } from "@refinedev/devtools";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 import { useNotificationProvider } from "@refinedev/antd";
 import "@refinedev/antd/dist/reset.css";
@@ -18,6 +17,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import axios from "axios";
+import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import { authProvider, TOKEN_KEY } from "./api";
 import { ColorModeContextProvider } from "./contexts/color-mode";
 import { Home } from "./pages/home";
@@ -29,6 +29,7 @@ import esES from "antd/locale/es_ES";
 dayjs.locale("es");
 
 const API_URL = import.meta.env.VITE_API_URL ?? "";
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY ?? "";
 
 const apiClient = axios.create();
 
@@ -62,12 +63,20 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 
 function App() {
   return (
-    <BrowserRouter>
-      <RefineKbarProvider>
-        <ColorModeContextProvider>
-          <AntdApp>
-            <ConfigProvider locale={esES}>
-              <DevtoolsProvider>
+    <GoogleReCaptchaProvider
+      reCaptchaKey={RECAPTCHA_SITE_KEY}
+      scriptProps={{
+        async: false,
+        defer: false,
+        appendTo: "head",
+        nonce: undefined,
+      }}
+    >
+      <BrowserRouter>
+        <RefineKbarProvider>
+          <ColorModeContextProvider>
+            <AntdApp>
+              <ConfigProvider locale={esES}>
                 <Refine
                   dataProvider={apiDataProvider}
                   notificationProvider={useNotificationProvider}
@@ -95,13 +104,12 @@ function App() {
                   <UnsavedChangesNotifier />
                   <DocumentTitleHandler />
                 </Refine>
-                <DevtoolsPanel />
-              </DevtoolsProvider>
-            </ConfigProvider>
-          </AntdApp>
-        </ColorModeContextProvider>
-      </RefineKbarProvider>
-    </BrowserRouter>
+              </ConfigProvider>
+            </AntdApp>
+          </ColorModeContextProvider>
+        </RefineKbarProvider>
+      </BrowserRouter>
+    </GoogleReCaptchaProvider>
   );
 }
 
