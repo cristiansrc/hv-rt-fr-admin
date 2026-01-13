@@ -9,6 +9,17 @@ import { LabelPage } from "../../../src/pages/label/LabelPage";
 import * as labelProvider from "../../../src/api/labelProvider";
 import { useTable } from "@refinedev/antd";
 
+// Mock axios before anything else imports it
+vi.mock("axios", async () => {
+  const actual = await vi.importActual<typeof import("axios")>("axios");
+  return {
+    ...actual,
+    isAxiosError: (error: any): error is import("axios").AxiosError => {
+      return error?.isAxiosError === true || (error?.response !== undefined);
+    },
+  };
+});
+
 vi.mock("../../../src/api/labelProvider");
 vi.mock("@refinedev/core");
 vi.mock("@refinedev/antd", () => ({
@@ -282,5 +293,33 @@ describe("LabelPage", () => {
       expect.objectContaining({ type: "error" }),
     );
     expect(refetchMock).not.toHaveBeenCalled();
+  });
+
+  it("shows specific error when deletion fails with status 412", async () => {
+    const user = userEvent.setup();
+    const axiosError = {
+      isAxiosError: true,
+      response: { status: 412 },
+    };
+    deleteLabelMock.mockRejectedValueOnce(axiosError);
+
+    render(<LabelPage />);
+    await screen.findByText("Etiqueta 1");
+    const deleteButton = await screen.findByRole("button", { name: /eliminar/i });
+
+    await user.click(deleteButton);
+    await user.click(await screen.findByRole("button", { name: "Sí" }));
+
+    await waitFor(() => expect(notificationErrorSpy).toHaveBeenCalled());
+    expect(messageErrorSpy).toHaveBeenCalledWith(
+      "El label está relacionado. Elimina la relación antes de borrar.",
+    );
+    expect(openNotificationMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "error",
+        message: "No se pudo eliminar",
+        description: "El label está relacionado. Elimina la relación antes de borrar.",
+      }),
+    );
   });
 });

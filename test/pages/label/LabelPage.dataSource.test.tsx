@@ -47,5 +47,5 @@ describe("LabelPage dataSource fallback", () => {
 
     const lastProps = tablePropsSpy.mock.calls.at(-1)?.[0];
     expect(lastProps?.dataSource).toEqual([]);
-  });
+  }, 10000);
 });

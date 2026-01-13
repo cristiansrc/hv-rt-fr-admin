@@ -56,7 +56,11 @@ describe("basicDataProvider", () => {
     const result = await getBasicData();
 
     expect(result).toEqual(basicDataMock);
-    expect(axiosMock.get).toHaveBeenCalledWith("/basic-data/1");
+    expect(axiosMock.get).toHaveBeenCalledWith("/basic-data/1", {
+      headers: {
+        "x-skip-error-redirect": "true",
+      },
+    });
   });
 
   it("updates basic data and returns the status", async () => {
@@ -73,7 +77,11 @@ describe("basicDataProvider", () => {
       data: basicDataMock,
       status: 204,
     });
-    expect(axiosMock.put).toHaveBeenCalledWith("/basic-data/1", payload);
+    expect(axiosMock.put).toHaveBeenCalledWith("/basic-data/1", payload, {
+      headers: {
+        "x-skip-error-redirect": "true",
+      },
+    });
   });
 
   it("uses the base endpoint when loading without a token", async () => {
@@ -112,7 +120,15 @@ describe("basicDataProvider", () => {
       descriptionPdfEng: basicDataMock.descriptionPdfEng,
     });
 
-    expect(axiosMock.get).toHaveBeenCalledWith("/basic-data/1");
-    expect(axiosMock.put).toHaveBeenCalledWith("/basic-data/1", expect.any(Object));
+    expect(axiosMock.get).toHaveBeenCalledWith("/basic-data/1", {
+      headers: {
+        "x-skip-error-redirect": "true",
+      },
+    });
+    expect(axiosMock.put).toHaveBeenCalledWith("/basic-data/1", expect.any(Object), {
+      headers: {
+        "x-skip-error-redirect": "true",
+      },
+    });
   });
 });

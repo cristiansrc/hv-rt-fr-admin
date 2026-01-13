@@ -65,7 +65,16 @@ vi.mock("antd", () => {
         ))}
       </div>
     ),
-    Popconfirm: ({ children }: any) => <div>{children}</div>,
+    Popconfirm: ({ children, onConfirm }: any) => (
+      <div>
+        {children}
+        {onConfirm && (
+          <button onClick={onConfirm} data-testid="popconfirm-confirm">
+            Sí
+          </button>
+        )}
+      </div>
+    ),
     Tag: ({ children }: any) => <span>{children}</span>,
     Typography: {
       Text: ({ children }: any) => <span>{children}</span>,
@@ -199,5 +208,29 @@ describe("SkillTypePage coverage", () => {
       screen.getByRole("button", { name: /crear tipo de habilidad/i }),
     );
     expect(screen.getByText("Procesando...")).toBeInTheDocument();
+  });
+
+  it("calls handleDelete when Popconfirm is confirmed", async () => {
+    const user = userEvent.setup();
+    const handleDeleteMock = vi.fn();
+    
+    (skillTypeList.useSkillTypeList as unknown as vi.Mock).mockReturnValue({
+      data: [{ id: 1, name: "Type", nameEng: "Type EN" }],
+      isLoading: false,
+      isBusy: false,
+      handleDelete: handleDeleteMock,
+      reloadSkillTypes: vi.fn(),
+      setSuccessOnReload: vi.fn(),
+    });
+
+    render(<SkillTypePage />);
+
+    const deleteButton = screen.getByRole("button", { name: /eliminar/i });
+    await user.click(deleteButton);
+    
+    const confirmButton = screen.getByRole("button", { name: /sí/i });
+    await user.click(confirmButton);
+    
+    expect(handleDeleteMock).toHaveBeenCalledWith(1);
   });
 });

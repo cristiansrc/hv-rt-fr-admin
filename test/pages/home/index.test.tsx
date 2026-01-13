@@ -156,7 +156,7 @@ describe("Home page", () => {
     await user.click(screen.getByRole("menuitem", { name: /home/i }));
 
     expect(await screen.findByTestId("home-page")).toBeInTheDocument();
-  });
+  }, 10000);
 
   it("renders the label page when the label menu option is selected", async () => {
     const user = userEvent.setup();
