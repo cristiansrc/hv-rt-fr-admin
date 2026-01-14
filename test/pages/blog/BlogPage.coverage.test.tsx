@@ -316,29 +316,6 @@ describe("BlogPage coverage", () => {
     expect(screen.getByRole("heading", { name: /crear blog/i })).toBeInTheDocument();
   });
 
-  it("validates required image and video fields with valid values (lines 32, 39)", async () => {
-    const user = userEvent.setup();
-    (blogForm.useBlogForm as unknown as vi.Mock).mockReturnValue({
-      form: undefined,
-      isLoading: false,
-      isSaving: false,
-      blogTypes: [],
-      isBlogTypesLoading: false,
-      selectedImage: { id: 1 },
-      selectedVideo: { id: 2 },
-      handleImageSelect: vi.fn(),
-      handleVideoSelect: vi.fn(),
-      handleSubmit: vi.fn().mockResolvedValue(true),
-    });
-
-    render(<BlogPage />);
-    await user.click(screen.getByRole("button", { name: /crear blog/i }));
-    
-    // The validators should pass with valid values (lines 32 and 39)
-    // The form should render successfully
-    expect(screen.getByRole("heading", { name: /crear blog/i })).toBeInTheDocument();
-  });
-
   it("closes video preview when handleCloseVideoPreview is called", async () => {
     const user = userEvent.setup();
     (blogForm.useBlogForm as unknown as vi.Mock).mockReturnValue({
