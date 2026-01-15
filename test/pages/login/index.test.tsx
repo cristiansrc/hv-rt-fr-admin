@@ -4,8 +4,10 @@ import userEvent from "@testing-library/user-event";
 
 import { Login } from "../../../src/pages/login";
 import * as refineCore from "@refinedev/core";
+import * as useAltchaHook from "../../../src/hooks/useAltcha";
 
 vi.mock("@refinedev/core");
+vi.mock("../../../src/hooks/useAltcha");
 const navigateMock = vi.fn();
 vi.mock(
   "react-router-dom",
@@ -19,10 +21,13 @@ vi.mock(
 );
 
 const mutateMock = vi.fn();
+const solveAltchaMock = vi.fn().mockResolvedValue("mock-altcha-payload");
 
 describe("Login page", () => {
   beforeEach(() => {
     mutateMock.mockReset();
+    solveAltchaMock.mockResolvedValue("mock-altcha-payload");
+    
     (refineCore.useLogin as unknown as vi.Mock).mockReturnValue({
       mutate: mutateMock,
       isLoading: false,
@@ -35,6 +40,18 @@ describe("Login page", () => {
     (refineCore.useLogout as unknown as vi.Mock).mockReturnValue({
       mutate: vi.fn(),
       isLoading: false,
+    });
+    (useAltchaHook.useAltcha as unknown as vi.Mock).mockReturnValue({
+      challenge: {
+        algorithm: "SHA-256",
+        challenge: "test-challenge",
+        salt: "test-salt",
+        signature: "test-signature",
+      },
+      isLoading: false,
+      error: null,
+      altchaPayload: null,
+      solveAltcha: solveAltchaMock,
     });
   });
 
@@ -52,6 +69,7 @@ describe("Login page", () => {
       expect(mutateMock).toHaveBeenCalledWith({
         username: "demo",
         password: "secret",
+        altcha: "mock-altcha-payload",
       }),
     );
     },

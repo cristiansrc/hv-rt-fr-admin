@@ -25,19 +25,17 @@ const createError = (message: string) => {
 };
 
 export const authProvider: AuthProvider = {
-  login: async ({ username, password, recaptchaToken }) => {
+  login: async ({ username, password, altcha }) => {
     if (!username || !password) {
-      return {
-        success: false,
-        error: createError("Usuario y contraseña son obligatorios"),
-      };
+      throw createError("Usuario y contraseña son obligatorios");
+    }
+
+    if (!altcha) {
+      throw createError("Error al verificar Altcha. Intenta recargar la página.");
     }
 
     if (!API_URL) {
-      return {
-        success: false,
-        error: createError("No se encontró la URL base de la API"),
-      };
+      throw createError("No se encontró la URL base de la API");
     }
 
     try {
@@ -49,7 +47,7 @@ export const authProvider: AuthProvider = {
         body: JSON.stringify({
           user: username,
           password,
-          recaptchaToken: recaptchaToken || undefined,
+          altcha,
         }),
       });
 
@@ -57,20 +55,14 @@ export const authProvider: AuthProvider = {
         const payload = await response.json().catch(() => null);
         const message =
           payload?.message || "Hay un problema al iniciar sesión";
-        return {
-          success: false,
-          error: createError(message),
-        };
+        throw createError(message);
       }
 
       const data = await response.json();
       const token = data?.token;
 
       if (!token) {
-        return {
-          success: false,
-          error: createError("El servidor no devolvió un token válido"),
-        };
+        throw createError("El servidor no devolvió un token válido");
       }
 
       localStorage.setItem(TOKEN_KEY, token);
@@ -79,12 +71,9 @@ export const authProvider: AuthProvider = {
         redirectTo: "/",
       };
     } catch (error) {
-      return {
-        success: false,
-        error: createError(
-          error instanceof Error ? error.message : "Error en la conexión",
-        ),
-      };
+      throw createError(
+        error instanceof Error ? error.message : "Error en la conexión",
+      );
     }
   },
   logout: async () => {
