@@ -17,7 +17,6 @@ import {
   useLocation,
 } from "react-router-dom";
 import axios from "axios";
-import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import { authProvider, TOKEN_KEY } from "./api";
 import { ColorModeContextProvider } from "./contexts/color-mode";
 import { Home } from "./pages/home";
@@ -29,7 +28,6 @@ import esES from "antd/locale/es_ES";
 dayjs.locale("es");
 
 const API_URL = import.meta.env.VITE_API_URL ?? "";
-const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY ?? "";
 
 const apiClient = axios.create();
 
@@ -63,53 +61,43 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 
 function App() {
   return (
-    <GoogleReCaptchaProvider
-      reCaptchaKey={RECAPTCHA_SITE_KEY}
-      scriptProps={{
-        async: false,
-        defer: false,
-        appendTo: "head",
-        nonce: undefined,
-      }}
-    >
-      <BrowserRouter>
-        <RefineKbarProvider>
-          <ColorModeContextProvider>
-            <AntdApp>
-              <ConfigProvider locale={esES}>
-                <Refine
-                  dataProvider={apiDataProvider}
-                  notificationProvider={useNotificationProvider}
-                  routerProvider={routerProvider}
-                  authProvider={authProvider}
-                  options={{
-                    syncWithLocation: true,
-                    warnWhenUnsavedChanges: true,
-                    projectId: "epAGNA-oqPpfF-voMWX5",
-                  }}
-                >
-                  <Routes>
-                    <Route path="/login" element={<Login />} />
-                    <Route
-                      path="/"
-                      element={
-                        <ProtectedRoute>
-                          <Home />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                  </Routes>
-                  <RefineKbar />
-                  <UnsavedChangesNotifier />
-                  <DocumentTitleHandler />
-                </Refine>
-              </ConfigProvider>
-            </AntdApp>
-          </ColorModeContextProvider>
-        </RefineKbarProvider>
-      </BrowserRouter>
-    </GoogleReCaptchaProvider>
+    <BrowserRouter>
+      <RefineKbarProvider>
+        <ColorModeContextProvider>
+          <AntdApp>
+            <ConfigProvider locale={esES}>
+              <Refine
+                dataProvider={apiDataProvider}
+                notificationProvider={useNotificationProvider}
+                routerProvider={routerProvider}
+                authProvider={authProvider}
+                options={{
+                  syncWithLocation: true,
+                  warnWhenUnsavedChanges: true,
+                  projectId: "epAGNA-oqPpfF-voMWX5",
+                }}
+              >
+                <Routes>
+                  <Route path="/login" element={<Login />} />
+                  <Route
+                    path="/"
+                    element={
+                      <ProtectedRoute>
+                        <Home />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+                <RefineKbar />
+                <UnsavedChangesNotifier />
+                <DocumentTitleHandler />
+              </Refine>
+            </ConfigProvider>
+          </AntdApp>
+        </ColorModeContextProvider>
+      </RefineKbarProvider>
+    </BrowserRouter>
   );
 }
 

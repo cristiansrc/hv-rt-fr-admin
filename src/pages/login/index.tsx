@@ -3,6 +3,7 @@ import { Button, Card, Form, Input, Space, Typography, Alert } from "antd";
 import { Navigate } from "react-router-dom";
 import "../../styles/login.css";
 import { useLoginPage, type LoginFormValues } from "../../hooks/login/useLoginPage";
+import { LoadingBlock } from "../../components/LoadingBlock";
 
 export const Login = () => {
   const {
@@ -19,8 +20,12 @@ export const Login = () => {
 
   return (
     <div className="login-page">
-      <Card className="login-card" variant="outlined">
-        <Space direction="vertical" size="middle" className="login-space">
+      <div className="login-container">
+        {isLoginLoading && (
+          <LoadingBlock className="login-loading-overlay" tip="Iniciando sesión..." />
+        )}
+        <Card className="login-card" variant="outlined" style={{ position: 'relative' }}>
+          <Space direction="vertical" size="middle" className="login-space">
           <Typography.Title level={3} className="login-title">
             Accede a tu administrador
           </Typography.Title>
@@ -48,6 +53,7 @@ export const Login = () => {
                 placeholder="Usuario"
                 autoComplete="username"
                 size="large"
+                disabled={isLoginLoading}
               />
             </Form.Item>
             <Form.Item<LoginFormValues>
@@ -60,6 +66,7 @@ export const Login = () => {
                 placeholder="Contraseña"
                 autoComplete="current-password"
                 size="large"
+                disabled={isLoginLoading}
               />
             </Form.Item>
             <Form.Item>
@@ -69,6 +76,7 @@ export const Login = () => {
                 block
                 size="large"
                 loading={isLoginLoading}
+                disabled={isLoginLoading}
               >
                 Iniciar sesión
               </Button>
@@ -76,6 +84,7 @@ export const Login = () => {
           </Form>
         </Space>
       </Card>
+      </div>
     </div>
   );
 };

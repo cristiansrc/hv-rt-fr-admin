@@ -19,10 +19,27 @@ describe("authProvider", () => {
   it("returns an error when credentials are missing", async () => {
     const { authProvider } = await setupAuthProvider();
 
-    const response = await authProvider.login({ username: "", password: "" });
+    const response = await authProvider.login({ 
+      username: "", 
+      password: "",
+      altcha: "test-altcha",
+    });
 
     expect(response.success).toBe(false);
     expect(response.error?.message).toBe("Usuario y contraseña son obligatorios");
+  });
+
+  it("returns an error when altcha is missing", async () => {
+    const { authProvider } = await setupAuthProvider();
+
+    const response = await authProvider.login({ 
+      username: "user", 
+      password: "pass",
+      altcha: undefined as any,
+    });
+
+    expect(response.success).toBe(false);
+    expect(response.error?.message).toBe("Error al verificar Altcha. Intenta recargar la página.");
   });
 
   it("returns an error when the API URL is missing", async () => {
@@ -31,6 +48,7 @@ describe("authProvider", () => {
     const response = await authProvider.login({
       username: "user",
       password: "pass",
+      altcha: "test-altcha",
     });
 
     expect(response.success).toBe(false);
@@ -47,6 +65,7 @@ describe("authProvider", () => {
     const result = await authProvider.login({
       username: "user",
       password: "wrong",
+      altcha: "test-altcha",
     });
 
     expect(result.success).toBe(false);
@@ -65,6 +84,7 @@ describe("authProvider", () => {
     const result = await authProvider.login({
       username: "user",
       password: "wrong",
+      altcha: "test-altcha",
     });
 
     expect(result.success).toBe(false);
@@ -78,6 +98,7 @@ describe("authProvider", () => {
     const result = await authProvider.login({
       username: "user",
       password: "pass",
+      altcha: "test-altcha",
     });
 
     expect(result.success).toBe(false);
@@ -91,6 +112,7 @@ describe("authProvider", () => {
     const result = await authProvider.login({
       username: "user",
       password: "pass",
+      altcha: "test-altcha",
     });
 
     expect(result.success).toBe(false);
@@ -107,6 +129,7 @@ describe("authProvider", () => {
     const result = await authProvider.login({
       username: "user",
       password: "pass",
+      altcha: "test-altcha",
     });
 
     expect(result.success).toBe(false);
@@ -123,10 +146,25 @@ describe("authProvider", () => {
     const result = await authProvider.login({
       username: "user",
       password: "pass",
+      altcha: "test-altcha",
     });
 
     expect(result.success).toBe(true);
     expect(localStorage.getItem(TOKEN_KEY)).toBe("jwt");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost/login",
+      expect.objectContaining({
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user: "user",
+          password: "pass",
+          altcha: "test-altcha",
+        }),
+      }),
+    );
   });
 
   it("clears token on logout", async () => {

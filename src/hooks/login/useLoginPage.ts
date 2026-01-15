@@ -1,7 +1,7 @@
 import { Form } from "antd";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLogin, useIsAuthenticated } from "@refinedev/core";
-import { useReCaptchaToken } from "../useReCaptcha";
+import { useAltcha } from "../useAltcha";
 
 export type LoginFormValues = {
   user: string;
@@ -10,25 +10,55 @@ export type LoginFormValues = {
 
 export const useLoginPage = () => {
   const [form] = Form.useForm<LoginFormValues>();
-  const { mutate: login, isLoading: isLoginLoading, error } = useLogin();
+  const { mutateAsync: login, error } = useLogin();
   const { data, isLoading: isAuthLoading } = useIsAuthenticated();
   const hasSession = Boolean(data?.authenticated);
-  const { getReCaptchaToken } = useReCaptchaToken();
+  const { solveAltcha, isLoading: isAltchaLoading, error: altchaError } = useAltcha();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Desactivar el loading y limpiar formulario cuando hay un error
   useEffect(() => {
     if (error) {
       form.setFieldsValue({ password: "" });
+      setIsSubmitting(false); // Desactivar el overlay cuando falla el login
     }
   }, [error, form]);
 
   const onFinish = async ({ user, password }: LoginFormValues) => {
-    const recaptchaToken = await getReCaptchaToken();
+    // Activar el loading inmediatamente
+    setIsSubmitting(true);
     
-    login({
-      username: user,
-      password,
-      recaptchaToken: recaptchaToken || undefined,
-    });
+    try {
+      // Resolver el challenge de Altcha antes de hacer login
+      const altchaPayload = await solveAltcha();
+      
+      if (!altchaPayload) {
+        form.setFields([
+          {
+            name: "password",
+            errors: [
+              altchaError?.message || "Error al verificar Altcha. Intenta recargar la página.",
+            ],
+          },
+        ]);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Esperar el resultado del login con await
+      const result = await login({
+        username: user,
+        password,
+        altcha: altchaPayload,
+      });
+      
+      // Si login retorna sin error, mantener isSubmitting en true hasta que se redirija
+      // Si no, el useEffect de error lo desactivará
+    } catch (err) {
+      // Si hay cualquier error, desactivar el loading para permitir reintentar
+      console.error("Error en login:", err);
+      setIsSubmitting(false);
+    }
   };
 
   const errorMessage =
@@ -38,10 +68,14 @@ export const useLoginPage = () => {
         ? error
         : undefined;
 
+  // El loading del overlay debe ser controlado SOLO por isSubmitting
+  // No incluir isLoginLoading porque puede cambiar antes de que termine el proceso
+  const isLoading = isSubmitting || isAltchaLoading;
+
   return {
     form,
-    isLoginLoading,
-    errorMessage,
+    isLoginLoading: isLoading,
+    errorMessage: errorMessage || (altchaError ? altchaError.message : undefined),
     onFinish,
     shouldRedirect: !isAuthLoading && hasSession,
   };

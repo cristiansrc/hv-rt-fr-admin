@@ -7,9 +7,14 @@
   background: var(--ant-bg-body);
 }
 
-.login-card {
+.login-container {
   width: 100%;
   max-width: 420px;
+  position: relative;
+}
+
+.login-card {
+  width: 100%;
 }
 
 .login-card .ant-card-body {
@@ -28,4 +33,29 @@
 .login-description {
   text-align: center;
   width: 100%;
+}
+
+.login-loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  pointer-events: all;
+  z-index: 1000;
+  border-radius: 8px;
+}
+.login-space .ant-alert {
+  background-color: #fce4e6 !important;
+  border-color: #f5222d !important;
+}
+
+.login-space .ant-alert-error .ant-alert-message {
+  color: #d32f2f !important;
+  font-weight: 600;
+}
+
+.login-space .ant-alert-error .ant-alert-icon {
+  color: #d32f2f !important;
 }
