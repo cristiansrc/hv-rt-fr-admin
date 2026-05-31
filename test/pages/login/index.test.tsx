@@ -1,0 +1,121 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+
+import { Login } from "../../../src/pages/login";
+import * as refineCore from "@refinedev/core";
+import * as useAltchaHook from "../../../src/hooks/useAltcha";
+
+vi.mock("@refinedev/core");
+vi.mock("../../../src/hooks/useAltcha");
+const navigateMock = vi.fn();
+vi.mock(
+  "react-router-dom",
+  () => ({
+    Navigate: (props: { to: string; replace: boolean }) => {
+      navigateMock(props);
+      return <div data-testid="navigate" />;
+    },
+  }),
+  { virtual: true },
+);
+
+const mutateMock = vi.fn();
+const solveAltchaMock = vi.fn().mockResolvedValue("mock-altcha-payload");
+
+describe("Login page", () => {
+  beforeEach(() => {
+    mutateMock.mockReset();
+    solveAltchaMock.mockResolvedValue("mock-altcha-payload");
+    
+    (refineCore.useLogin as unknown as vi.Mock).mockReturnValue({
+      mutate: mutateMock,
+      isLoading: false,
+      error: undefined,
+    });
+    (refineCore.useIsAuthenticated as unknown as vi.Mock).mockReturnValue({
+      data: { authenticated: false },
+      isLoading: false,
+    });
+    (refineCore.useLogout as unknown as vi.Mock).mockReturnValue({
+      mutate: vi.fn(),
+      isLoading: false,
+    });
+    (useAltchaHook.useAltcha as unknown as vi.Mock).mockReturnValue({
+      challenge: {
+        algorithm: "SHA-256",
+        challenge: "test-challenge",
+        salt: "test-salt",
+        signature: "test-signature",
+      },
+      isLoading: false,
+      error: null,
+      altchaPayload: null,
+      solveAltcha: solveAltchaMock,
+    });
+  });
+
+  it(
+    "renders the login form and calls mutate with credentials",
+    async () => {
+    const user = userEvent.setup();
+    render(<Login />);
+
+    await user.type(screen.getByLabelText(/Usuario/i), "demo");
+    await user.type(screen.getByLabelText(/Contraseña/i), "secret");
+    await user.click(screen.getByRole("button", { name: /iniciar sesión/i }));
+
+    await waitFor(() =>
+      expect(mutateMock).toHaveBeenCalledWith({
+        username: "demo",
+        password: "secret",
+        altcha: "mock-altcha-payload",
+      }),
+    );
+    },
+    10000,
+  );
+
+  it("redirects to home when session already exists", () => {
+    (refineCore.useIsAuthenticated as unknown as vi.Mock).mockReturnValue({
+      data: { authenticated: true },
+      isLoading: false,
+    });
+
+    render(<Login />);
+    expect(screen.getByTestId("navigate")).toBeInTheDocument();
+    expect(navigateMock).toHaveBeenCalledWith({ to: "/", replace: true });
+  });
+
+  it("shows an error alert when login fails", () => {
+    const errorMessage = "Credenciales incorrectas";
+    (refineCore.useLogin as unknown as vi.Mock).mockReturnValue({
+      mutate: mutateMock,
+      isLoading: false,
+      error: new Error(errorMessage),
+    });
+    (refineCore.useIsAuthenticated as unknown as vi.Mock).mockReturnValue({
+      data: { authenticated: false },
+      isLoading: false,
+    });
+
+    render(<Login />);
+    expect(screen.getByText(errorMessage)).toBeInTheDocument();
+  });
+
+  it("shows an error alert when login fails with a string error", () => {
+    const errorMessage = "Credenciales inválidas";
+    (refineCore.useLogin as unknown as vi.Mock).mockReturnValue({
+      mutate: mutateMock,
+      isLoading: false,
+      error: errorMessage,
+    });
+    (refineCore.useIsAuthenticated as unknown as vi.Mock).mockReturnValue({
+      data: { authenticated: false },
+      isLoading: false,
+    });
+
+    render(<Login />);
+    expect(screen.getByText(errorMessage)).toBeInTheDocument();
+  });
+});
