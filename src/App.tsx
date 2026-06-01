@@ -33,12 +33,11 @@ const apiClient = axios.create();
 
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem(TOKEN_KEY);
-  const headers = {
-    ...config.headers,
-    "Content-Type": config.headers?.["Content-Type"] || "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-  return { ...config, headers };
+  config.headers.set("Content-Type", config.headers?.["Content-Type"] || "application/json");
+  if (token) {
+    config.headers.set("Authorization", `Bearer ${token}`);
+  }
+  return config;
 });
 
 const apiDataProvider = dataProvider(API_URL, apiClient);

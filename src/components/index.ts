@@ -2,6 +2,7 @@ export { Header } from "./header";
 export { LoadingBlock } from "./LoadingBlock";
 export { RichTextEditor } from "./RichTextEditor";
 export {
+  ExperienceSelector,
   ImageSelector,
   LabelSelector,
   ResourceSelectorModal,

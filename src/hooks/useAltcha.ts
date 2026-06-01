@@ -73,7 +73,12 @@ export const useAltcha = () => {
       );
       
       const solution = await promise;
-      
+
+      if (!solution) {
+        console.warn("No se pudo resolver el challenge de Altcha");
+        return null;
+      }
+
       // La solución incluye el número encontrado, necesitamos crear el payload completo
       const solutionPayload = {
         algorithm: challenge.algorithm,

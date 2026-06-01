@@ -57,7 +57,7 @@ export const ResourceSelectorModal = <T extends { id: number }>({
 
   const rowSelection = useMemo(
     () => ({
-      type: selectionMode === "single" ? "radio" : "checkbox",
+      type: (selectionMode === "single" ? "radio" : "checkbox") as "radio" | "checkbox",
       selectedRowKeys,
       onChange: (keys: Key[], records: T[]) => {
         setSelectedRowKeys(keys);

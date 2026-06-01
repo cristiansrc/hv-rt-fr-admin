@@ -5,3 +5,4 @@ export { ImageSelector } from "./ImageSelector";
 export { LabelSelector } from "./LabelSelector";
 export { SkillSelector } from "./SkillSelector";
 export { SkillSonSelector } from "./SkillSonSelector";
+export { ExperienceSelector } from "./ExperienceSelector";
