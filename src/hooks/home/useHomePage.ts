@@ -14,10 +14,16 @@ export const MENU_KEYS = {
   LABEL: "label",
   VIDEO: "video",
   IMAGES: "images",
+  COURSES: "courses",
+  CERTIFICATIONS: "certifications",
+  LANGUAGES: "languages",
+  REFERENCES: "references",
+  CUSTOM_SECTIONS: "custom-sections",
+  FUTURED_PROJECTS: "futured-projects",
 };
 
 export const useHomePage = () => {
-  const { mutate: logout, isLoading: isLogoutLoading } = useLogout();
+  const { mutate: logout, isPending: isLogoutLoading } = useLogout();
   const [activeMenuKey, setActiveMenuKey] = useState(MENU_KEYS.HOME);
 
   return {

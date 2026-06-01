@@ -116,7 +116,7 @@ describe("RichTextEditor", () => {
     render(<RichTextEditor value="<p>new</p>" />);
 
     await waitFor(() =>
-      expect(editor.commands.setContent).toHaveBeenCalledWith("<p>new</p>", false),
+      expect(editor.commands.setContent).toHaveBeenCalledWith("<p>new</p>", { emitUpdate: false }),
     );
   });
 

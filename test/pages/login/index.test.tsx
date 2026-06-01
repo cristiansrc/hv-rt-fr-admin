@@ -29,6 +29,7 @@ describe("Login page", () => {
     solveAltchaMock.mockResolvedValue("mock-altcha-payload");
     
     (refineCore.useLogin as unknown as vi.Mock).mockReturnValue({
+      mutateAsync: mutateMock,
       mutate: mutateMock,
       isLoading: false,
       error: undefined,
@@ -90,6 +91,7 @@ describe("Login page", () => {
   it("shows an error alert when login fails", () => {
     const errorMessage = "Credenciales incorrectas";
     (refineCore.useLogin as unknown as vi.Mock).mockReturnValue({
+      mutateAsync: mutateMock,
       mutate: mutateMock,
       isLoading: false,
       error: new Error(errorMessage),
@@ -106,6 +108,7 @@ describe("Login page", () => {
   it("shows an error alert when login fails with a string error", () => {
     const errorMessage = "Credenciales inválidas";
     (refineCore.useLogin as unknown as vi.Mock).mockReturnValue({
+      mutateAsync: mutateMock,
       mutate: mutateMock,
       isLoading: false,
       error: errorMessage,
