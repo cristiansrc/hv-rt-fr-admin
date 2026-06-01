@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { createImage, deleteImage } from "../../src/api/imageProvider";
 import { axiosClient } from "../../src/api/axiosClient";
-import type { ImagePayload } from "../../src/interfaces/image/ImagePayload";
 
 vi.mock("../../src/api/axiosClient", () => ({
   axiosClient: {
@@ -9,40 +9,30 @@ vi.mock("../../src/api/axiosClient", () => ({
   },
 }));
 
-const axiosMock = axiosClient as unknown as {
-  post: vi.Mock;
-  delete: vi.Mock;
-};
-
 describe("imageProvider", () => {
   beforeEach(() => {
-    axiosMock.post.mockReset();
-    axiosMock.delete.mockReset();
+    vi.clearAllMocks();
   });
 
-  it("creates an image and returns the status", async () => {
-    const payload: ImagePayload = {
-      name: "Imagen",
-      nameEng: "Image",
-      file: "base64-data",
+  it("creates an image successfully", async () => {
+    const payload = {
+      url: "https://example.com/image.jpg",
+      alt: "Test image",
     };
+    vi.mocked(axiosClient.post).mockResolvedValueOnce({ status: 201 });
 
-    axiosMock.post.mockResolvedValueOnce({ status: 201 });
-
-    const { createImage } = await import("../../src/api/imageProvider");
     const result = await createImage(payload);
 
-    expect(axiosMock.post).toHaveBeenCalledWith("/image-url", payload);
-    expect(result).toEqual({ status: 201 });
+    expect(result.status).toBe(201);
+    expect(axiosClient.post).toHaveBeenCalledWith("/image-url", payload);
   });
 
-  it("deletes an image by id and returns the status", async () => {
-    axiosMock.delete.mockResolvedValueOnce({ status: 204 });
+  it("deletes an image successfully", async () => {
+    vi.mocked(axiosClient.delete).mockResolvedValueOnce({ status: 204 });
 
-    const { deleteImage } = await import("../../src/api/imageProvider");
-    const result = await deleteImage(10);
+    const result = await deleteImage(42);
 
-    expect(axiosMock.delete).toHaveBeenCalledWith("/image-url/10");
-    expect(result).toEqual({ status: 204 });
+    expect(result.status).toBe(204);
+    expect(axiosClient.delete).toHaveBeenCalledWith("/image-url/42");
   });
 });
